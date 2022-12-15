@@ -1,6 +1,6 @@
 # ACRM
 
-<img src="https://github.com/lestec-al/url-shortener-django/blob/main/pic_crm.png" width="640" height="360"/>
+<img src="https://github.com/lestec-al/crm/blob/main/pic_crm.png" width="640" height="360"/>
 
 Simple Django CRM website. A good starting point for creating a custom CRM with specific functions.
 
