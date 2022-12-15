@@ -1,0 +1,113 @@
+{% load static %}
+<link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %}</title>
+    </head>
+
+    <body class="bg-light" style="overflow-y:scroll">
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-expand-md navbar-light border-bottom border-secondary p-0" style="background-color:#e9ecef">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="{% url 'home' %}"><img src="{% static 'favicon.png' %}" width="30" height="30"></a>
+
+                    <div class="nav-item dropdown">
+                        <a class="nav-link link-dark dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <strong>{{ user|capfirst }}</strong>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-start">
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </div>
+
+                    <button class="navbar-toggler d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS" aria-expanded="false" aria-controls="collapseS" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <form class="mt-2 mb-2 w-100" action="{% url 'search' %}">
+                        <input class="form-control border-0" type="search" placeholder="Search" aria-label="Search" name="search">
+                    </form>
+                </div>
+            </nav>
+        </header>
+
+        <div class="container-fluid">
+            <div class="row">               
+                <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="collapseS">
+                    <a class="d-flex align-items-center m-3 link-dark text-decoration-none">
+                        <span class="fs-4">Sales stages</span>
+                    </a>
+
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            {% url 'sale_stages' 'r' as sale_stages_r_path %}
+                            {% if request.path == sale_stages_r_path %}
+                            <a class="nav-link active" aria-current="page" href="{% url 'sale_stages' 'r' %}">Request</a>
+                            {% else %}
+                            <a class="nav-link link-dark" href="{% url 'sale_stages' 'r' %}">Request</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            {% url 'sale_stages' 'p' as sale_stages_p_path %}
+                            {% if request.path == sale_stages_p_path %}
+                            <a class="nav-link active" aria-current="page" href="{% url 'sale_stages' 'p' %}">Pack</a>
+                            {% else %}
+                            <a class="nav-link link-dark" href="{% url 'sale_stages' 'p' %}">Pack</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            {% url 'sale_stages' 'd' as sale_stages_d_path %}
+                            {% if request.path == sale_stages_d_path %}
+                            <a class="nav-link active" aria-current="page" href="{% url 'sale_stages' 'd' %}">Delivery</a>
+                            {% else %}
+                            <a class="nav-link link-dark" href="{% url 'sale_stages' 'd' %}">Delivery</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            {% url 'sale_stages' 'f' as sale_stages_f_path %}
+                            {% if request.path == sale_stages_f_path %}
+                            <a class="nav-link active" aria-current="page" href="{% url 'sale_stages' 'f' %}">Finished</a>
+                            {% else %}
+                            <a class="nav-link link-dark" href="{% url 'sale_stages' 'f' %}">Finished</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            {% url 'sale_stages' 'c' as sale_stages_c_path %}
+                            {% if request.path == sale_stages_c_path %}
+                            <a class="nav-link active" aria-current="page" href="{% url 'sale_stages' 'c' %}">Canceled</a>
+                            {% else %}
+                            <a class="nav-link link-dark" href="{% url 'sale_stages' 'c' %}">Canceled</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+
+                    <hr>
+                    {% if user.is_staff %}
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a class="nav-link link-dark" href="/admin/">Admin</a>
+                        </li>
+                    </ul>
+                    <hr>
+                    {% endif %}
+                </div>
+
+                <main class="col-md-9 col-lg-10 min-vh-100">
+                    {% block content %}
+                    {% endblock content %}
+                </main>
+            </div>
+        </div>
+
+        <footer class="d-flex flex-wrap justify-content-end align-items-center mt-4 border-top" style="background-color:#e9ecef">
+            <div class="d-flex align-items-center">
+                <span class="text-muted m-3">© 2022 by Alex Yurhel</span>
+            </div>
+        </footer>
+    </body>
+</html>

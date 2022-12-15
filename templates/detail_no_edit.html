@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Sale{% endblock %}
+
+{% block content %}
+
+<div class="m-3">
+    <div class="mb-3">
+        {% url 'sale_create' as sale_create %}
+        {% if 'stage' in request.META.HTTP_REFERER|escape %}
+        <a class="btn btn-outline-dark btn-sm" href="{{ request.META.HTTP_REFERER|escape }}">←</a>
+        {% else %}
+        <a class="btn btn-outline-dark btn-sm" href="{% url 'home' %}">←</a>
+        {% endif %}
+    </div>
+
+    <div>
+        <label class="form-label">Stage</label>
+        <div class="input-group mb-3">
+            <select class="form-select form-select-sm" disabled>
+                <option selected>{{ sale.get_stage_display }}</option>
+            </select>
+        </div>
+        <label class="form-label">Client name</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control form-select-sm" value="{{ sale.client_name }}" disabled>
+        </div>
+        <label class="form-label">Client address</label>
+        <div class="input-group mb-3">
+            <textarea class="form-control form-control-sm" disabled>{{ sale.client_address }}</textarea>
+        </div>
+        <label class="form-label">Created</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control form-control-sm" value="{{ sale.date_created|date:'H:i d.m.Y' }}" disabled>
+        </div>
+        <label class="form-label">Updated</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control form-control-sm" value="{{ sale.date_updated|date:'H:i d.m.Y' }}" disabled>
+        </div>
+        <label class="form-label">Total price</label>
+        <div class="input-group mb-3">
+            <input id="total_price" type="text" class="form-control form-control-sm" value="{{ sale.total_price }}" disabled>
+        </div>
+    </div>
+
+    <div class="mb-3" id="additional_div">
+        {% for af in additional %}
+        <div id="additional_form_{{ forloop.counter }}">
+            <div>
+                <label class="form-label">{{ af.title }}</label>
+            </div>
+            <div>
+                <textarea class="form-control form-control-sm" disabled>{{ af.text }}</textarea>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <label for="products_div" class="form-label">Products</label>
+    <div class="mb-3" id="products_div">
+        {% for pr in sale.products.all %}
+        <div id="quantity_form_{{ forloop.counter }}">
+            <div>
+                <select class="form-select form-select-sm" disabled>
+                    <option myprice="{{ pr.price }}" value="{{ pr.id }}" selected>{{ pr }}  - price: {{ pr.price }}</option>
+                </select>
+            </div>
+            <div>
+                {% for pq in pr.productquantity_set.all %}
+                {% if pq.sale == sale %}
+                <input type="text" class="form-control form-control-sm" value="{{ pq.quantity }}" disabled>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

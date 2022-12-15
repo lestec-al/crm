@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Sale{% endblock %}
+
+{% block content %}
+
+<form method="POST" action="" class="m-3" autocomplete="off" id="main_form" name="main_form_name">
+    {% csrf_token %}
+    <div class="mb-3">
+        {% url 'sale_create' as sale_create %}
+        {% if 'stage' in request.META.HTTP_REFERER|escape %}
+        <a class="btn btn-outline-dark btn-sm" href="{{ request.META.HTTP_REFERER|escape }}">←</a>
+        {% else %}
+        <a class="btn btn-outline-dark btn-sm" href="{% url 'home' %}">←</a>
+        {% endif %}
+
+        <a class="btn btn-outline-dark btn-sm" onclick="add_form('additional_div', 'additional_form_empty');">Add field</a>
+
+        {% if request.path == sale_create %}
+        <input class="btn btn-outline-danger btn-sm" type="submit" value="Create">
+        {% else %}
+        <input class="btn btn-outline-danger btn-sm" type="submit" value="Update">
+        {% endif %}
+    </div>
+
+    <div>
+        {% if user.is_staff %}
+        <label for="stage" class="form-label">Stage</label>
+        <div class="input-group mb-3">
+            <select class="form-select form-select-sm" name="stage" form="main_form">
+                {% for s in form.stage %}
+                    {{ s }}
+                {% endfor %}
+            </select>
+        </div>
+        {% else %} 
+        <label for="stage {% if request.path == sale_create %}visually-hidden{% endif %}" class="form-label">Stage</label>
+        <div class="input-group mb-3 {% if request.path == sale_create %}visually-hidden{% endif %}">
+            <select class="form-select form-select-sm" name="stage" form="main_form">
+                {% for s in form.stage %}
+                    {% if s|striptags in "Request Pack Canceled" %}
+                        {{ s }}
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <label for="client_name" class="form-label">Client name</label>
+        <div class="input-group mb-3">
+            {% if form.errors.client_name %}
+            <input type="text" class="form-control form-select-sm is-invalid" id="client_name" name="client_name" value="{{ sale.client_name }}" maxlength="{{ form.client_name.field.max_length }}">
+            <div class="invalid-feedback">
+                {{ form.errors.client_name }}
+            </div>
+            {% else %}
+            <input type="text" class="form-control form-select-sm" id="client_name" name="client_name" value="{{ sale.client_name }}" maxlength="{{ form.client_name.field.max_length }}">
+            {% endif %}
+        </div>
+        <label for="client_address" class="form-label">Client address</label>
+        <div class="input-group mb-3">
+            {% if form.errors.client_address %}
+            <textarea class="form-control form-control-sm is-invalid" id="client_address" name="client_address">{{ sale.client_address }}</textarea>
+            <div class="invalid-feedback">
+                {{ form.errors.client_address }}
+            </div>
+            {% else %}
+            <textarea class="form-control form-control-sm" id="client_address" name="client_address">{{ sale.client_address }}</textarea>
+            {% endif %}
+        </div>
+        {% if user.is_staff %}
+        <label for="manager" class="form-label">Manager</label>
+        <div class="input-group mb-3">
+            <select class="form-select form-select-sm" name="manager" form="main_form">
+                {% for i in users %}
+                    {% if i == sale.manager %}
+                    <option value="{{ i.id }}" selected>{{ i.username }}</option>
+                    {% else %}
+                    <option value="{{ i.id }}">{{ i.username }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        {% if request.path != sale_create %}
+        <label class="form-label">Created</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control form-control-sm" value="{{ sale.date_created|date:'H:i d.m.Y' }}" disabled>
+        </div>
+        <label class="form-label">Updated</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control form-control-sm" value="{{ sale.date_updated|date:'H:i d.m.Y' }}" disabled>
+        </div>
+        {% endif %}
+        <label class="form-label">Total price</label>
+        <div class="input-group mb-3">
+            <input id="total_price" type="number" class="form-control form-control-sm" value="{{ sale.total_price }}" disabled>
+        </div>
+    </div>
+
+    {% if messages %}
+    <ul class="alert alert-danger" role="alert">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <!-- <label for="additional_div" class="form-label">Additional Fields</label> -->
+    <div class="mb-3" id="additional_div">
+        {% for af in additional %}
+        <div id="additional_form_{{ forloop.counter }}">
+            <div>
+                <input type="text" class="visually-hidden" name="add_additional_id" value="{{ af.id }}">
+                <input type="text" class="visually-hidden" name="add_additional_title" value="{{ af.title }}">
+                <label type="text" class="form-label">{{ af.title }}</label>
+
+                <input class="btn-check" type="checkbox" value="{{ af.id }}" id="additional-check-{{ af.id }}" name="remove_additional" autocomplete="off">
+                <label class="btn btn-outline-danger btn-sm" for="additional-check-{{ af.id }}">X</label>
+            </div>
+            <div>
+                <textarea class="form-control form-control-sm" name="add_additional_text">{{ af.text }}</textarea>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <label for="products_div" class="form-label">Products</label>
+    <a class="btn btn-outline-dark btn-sm" onclick="add_form('products_div', 'quantity_form_empty');">+</a>
+    <div class="mb-3" id="products_div">
+        {% for pr in sale.products.all %}
+        <div class="row" id="quantity_form_{{ forloop.counter }}">
+            <div class="col-sm-6 col-md-9 col-lg-9">
+                <select class="form-select form-select-sm" disabled>
+                    <option myprice="{{ pr.price }}" value="{{ pr.id }}" selected>{{ pr }}  - price: {{ pr.price }}</option>
+                </select>
+            </div>
+            <div class="col-sm-5 col-md-2 col-lg-2">
+                {% for pq in pr.productquantity_set.all %}
+                {% if pq.sale == sale %}
+                <input type="number" class="form-control form-control-sm" value="{{ pq.quantity }}" disabled>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-sm-1 col-md-1 col-lg-1">
+                <input class="btn-check" type="checkbox" value="{{ pr.id }}" id="products-check-{{ pr.id }}" name="remove_products" autocomplete="off" onchange="count_total_price()">
+                <label class="btn btn-outline-danger btn-sm" for="products-check-{{ pr.id }}">X</label>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</form>
+
+
+<!-- Empty additional form for cloning -->
+<div class="visually-hidden" id="additional_form_empty">
+    <div>
+        <a id="del_form_element" class="btn btn-outline-danger btn-sm">X</a>
+    </div>
+    <div>
+        <input type="text" class="visually-hidden" name="add_additional_id" value="new">
+        <input type="text" class="form-control form-control-sm" name="add_additional_title" placeholder="Field name" maxlength="100">
+    </div>
+    <div>
+        <textarea class="form-control form-control-sm" name="add_additional_text" placeholder="Field text"></textarea>
+    </div>
+</div>
+<!-- Empty products form for cloning -->
+<div class="row visually-hidden" id="quantity_form_empty">
+    <div class="col-sm-6 col-md-9 col-lg-9">
+        <select id="select_element" class="form-select form-select-sm" form="main_form" onchange="count_total_price()">
+            <option selected></option>
+            {% for p in products %}
+            <option myprice="{{ p.price }}" value="{{ p.id }}">{{ p }}  - price: {{ p.price }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-5 col-md-2 col-lg-2">
+        <input type="number" class="form-control form-control-sm" name="add_quantitys" placeholder="Quantity" onchange="count_total_price()">
+    </div>
+    <div class="col-sm-1 col-md-1 col-lg-1">
+        <a id="del_form_element" class="btn btn-outline-danger btn-sm">X</a>
+    </div>
+</div>
+
+
+<script>
+    function add_form(target_div, empty_form_id) {
+        // Get last element and generate new id
+        try {
+            var id = document.getElementById(target_div).lastElementChild.id;
+            var new_id = parseInt(id.slice(id.lastIndexOf("_")+1)) + 1;
+        }
+        catch(err) {
+            var new_id = 1;
+        }
+        // Clone form
+        var quantity_form = document.getElementById(empty_form_id);
+        var clone = quantity_form.cloneNode(true);
+        clone.className = "";
+        if (empty_form_id == "quantity_form_empty") {
+            count_total_price();
+            clone.querySelector("#select_element").name = "add_products";
+            clone.className = "row";
+        }
+        clone.id = empty_form_id.slice(0, empty_form_id.lastIndexOf("_")+1) + new_id;
+        clone.querySelector("#del_form_element").setAttribute("onClick", "del_form('"+clone.id+"');");
+        document.getElementById(target_div).appendChild(clone);
+    }
+
+    function del_form(element_id) {
+        var form = document.getElementById(element_id);
+        form.remove();
+        count_total_price();
+    }
+
+    function count_total_price() {
+        var products_div = document.getElementById('products_div');
+        // Check checked (for deletion) products
+        var check_list = [];
+        var checkBoxes = products_div.querySelectorAll('input.btn-check');
+        checkBoxes.forEach(element => {
+            if (element.checked == true) {
+                check_list.push(element.value);
+            }
+        });
+        // Count total price
+        var el = products_div.querySelectorAll('select.form-select');
+        var el_quantitys = products_div.querySelectorAll('input.form-control');
+        var elems = Array.from(el);
+        var elems_quantitys = Array.from(el_quantitys);
+        var total_price = 0;
+        for (var i = 0; i < elems.length; i++) {
+            var v = elems[i].selectedOptions[0].getAttribute('value');
+            if (!(check_list.includes(v))) {
+                var p = parseInt(elems[i].selectedOptions[0].getAttribute('myprice'));
+                var q = parseInt(elems_quantitys[i].value);
+                if (!isNaN(p) && !isNaN(q)) {
+                    total_price += p * q;
+                }
+            }
+        }
+        document.getElementById('total_price').value = total_price;
+    }
+</script>
+
+{% endblock %}

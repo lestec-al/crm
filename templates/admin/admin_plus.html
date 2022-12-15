@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}
+Site administration | ACRM
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">ACRM administration</a></h1>
+{% endblock %}
+
+{% block content %}
+
+<form method="POST" class="m-3" autocomplete="off" id="main_form">
+    {% csrf_token %}
+    {% for s in sales %}
+    <input type="hidden" name="_selected_action" value="{{ s.id }}" />
+    {% endfor %}
+
+    {% if users %}
+    <input type="text" class="form-control form-control-sm" name="manager" placeholder="Manager">
+    or
+    <select class="form-select form-select-sm" form="main_form" name="user">
+        <option selected></option>
+        {% for i in users %}
+        <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+    </select>
+    <input type="hidden" name="action" value="change_manager" />
+    <input type="submit" name="apply" value="Change manager"/>
+    {% endif %}
+
+    {% if stages %}
+    <select class="form-select form-select-sm" form="main_form" name="stage">
+        {% for value,readable in stages %}
+        <option value="{{ value }}">{{ readable }}</option>
+        {% endfor %}
+    </select>
+    <input type="hidden" name="action" value="change_stage" />
+    <input type="submit" name="apply" value="Change stage"/>
+    {% endif %}
+</form>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}ACRM{% endblock %}
+
+{% block content %}
+
+{% load additional_filters %}
+<h2 class="m-3">Sales <a class="btn btn-outline-dark btn-sm" href="{% url 'sale_create' %}">+</a></h2>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                {% for sf in sale_fields %}
+                <th scope="col">{{ sf|cut_underscores|title }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sales %}
+            <tr>
+                <td><a class="btn btn-outline-dark btn-sm" href="{% url 'sale_detail' s.id %}">→</a></td>
+                {% if 'id' in sale_fields %}
+                <td>{{ s.id }}</td>
+                {% endif %}
+                {% if 'client_name' in sale_fields %}
+                <td>{{ s.client_name }}</td>
+                {% endif %}
+                {% if 'client_address' in sale_fields %}
+                <td>{{ s.client_address }}</td>
+                {% endif %}
+                {% if 'manager' in sale_fields %}
+                <td>{{ s.manager }}</td>
+                {% endif %}
+                {% if 'date_created' in sale_fields %}
+                <td>{{ s.date_created|date:'H:i d.m.Y' }}</td>
+                {% endif %}
+                {% if 'date_updated' in sale_fields %}
+                <td>{{ s.date_updated|date:'H:i d.m.Y' }}</td>
+                {% endif %}
+                {% if 'total_price' in sale_fields %}
+                <td>{{ s.total_price }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
