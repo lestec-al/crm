@@ -5,9 +5,11 @@
 Simple Django CRM website. A good starting point for creating a custom CRM with specific functions.
 
 Basicaly, site have two interfaces: one for managers (white), one for staff users (blue). Blue interface it's modified django standard admin interface. Language there should be you language.
+
 On white interface you can:
 - login/logout
 - create/edit sales
+
 On blue interface you can:
 - login/logout
 - create/edit/delete users
